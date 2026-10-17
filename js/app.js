@@ -6,7 +6,7 @@
  */
 
 (function () {
-  const STORAGE_KEY = 'altus_contabilidad_state_v1';
+  const STORAGE_KEY = 'altus_contabilidad_state_v2';
   const SHEETS_CONFIG_KEY = 'altus_sheets_webhook_config_v1';
 
   let state = loadState();
