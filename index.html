@@ -64,23 +64,21 @@
   <div id="app-toast" class="hidden opacity-0 transition-opacity duration-300 fixed top-4 right-4 left-4 md:left-auto md:w-96 z-50 bg-white border border-emerald-500/40 text-emerald-900 px-4 py-3 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2"></div>
 
   <!-- Top Header Bar -->
-  <header class="sticky top-0 z-30 backdrop-blur-xl bg-white/95 border-b border-slate-200/80 px-4 py-2.5 shadow-xs">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+  <header class="sticky top-0 z-30 backdrop-blur-xl bg-white/95 border-b border-slate-200 px-4 py-3 shadow-xs">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
       <div class="flex items-center gap-3">
-        <img src="logos_altus/logo.png" alt="ALTUS Centro Educativo" class="h-10 md:h-12 w-auto object-contain" />
-        <div class="hidden sm:block border-l border-slate-200 pl-3">
-          <div class="flex items-center gap-2">
-            <span class="text-xs font-bold uppercase tracking-wider text-altus-blue">Auditoría SAT GT</span>
-            <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Ciclo 2026</span>
-          </div>
-          <p class="text-[11px] text-slate-500">Contabilidad Inteligente iPhone & Mac • <span id="header-entries-count" class="font-semibold text-slate-700">283 asientos</span></p>
+        <img src="logos_altus/logo.png" alt="ALTUS Centro Educativo" class="h-9 md:h-10 w-auto object-contain" />
+        <div class="hidden sm:flex items-center gap-2 border-l border-slate-200 pl-3">
+          <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700">Ciclo 2026</span>
+          <span class="text-xs text-slate-400">•</span>
+          <span id="header-entries-count" class="text-xs text-slate-500 font-medium">291 asientos auditados</span>
         </div>
       </div>
 
       <div class="flex items-center gap-2">
         <button id="sheets-connect-btn" onclick="window.AltusApp.openSheetsModal()" title="Configuración de Sincronización Google Sheets"
-          class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-xs font-bold text-emerald-900 shadow-xs transition-all cursor-pointer">
-          <span id="sheets-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-xs font-bold text-emerald-900 shadow-xs transition-all cursor-pointer">
+          <span id="sheets-status-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span id="sheets-status-label" class="font-bold">Google Sheets Conectado</span>
         </button>
 
@@ -92,202 +90,163 @@
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 pt-4 space-y-5">
+  <main class="max-w-7xl mx-auto px-4 pt-4 space-y-4">
 
-    <!-- Day 27 Payroll & Obligations Alert Banner -->
-    <div id="day27-alert-banner" class="bg-gradient-to-r from-amber-50/90 via-white to-altus-blue-light/50 border border-amber-200/90 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-altus-amber/20 border border-altus-amber/40 flex items-center justify-center text-xl shrink-0">🔔</div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span id="day27-countdown-badge" class="text-xs font-extrabold uppercase tracking-wider text-amber-900">AVISO NÓMINA DÍA 27</span>
-            <span class="text-[11px] px-2 py-0.5 rounded-md bg-white border border-amber-200 text-amber-800 font-semibold">Programado mensual</span>
-          </div>
-          <p class="text-xs text-slate-600 mt-1">
-            Planilla Líquida: <strong class="text-slate-900">Q 27,141.07</strong> (Monetaria) •
-            Separar a Ahorro: <strong class="text-altus-blue font-bold">Q 11,551.09</strong> •
-            Pagar IGSS: <strong class="text-emerald-700 font-bold">Q 4,278.00</strong> (desde Ahorro)
-          </p>
-        </div>
+    <!-- Day 27 Payroll & Obligations Notice (Compact & Clean) -->
+    <div id="day27-alert-banner" class="bg-amber-50/80 border border-amber-200 rounded-xl px-4 py-2.5 flex items-center justify-between gap-3 text-xs shadow-xs">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <span class="text-base">🔔</span>
+        <span id="day27-countdown-badge" class="font-extrabold uppercase tracking-wide text-amber-900 shrink-0">Aviso Nómina Día 27</span>
+        <span class="text-slate-600 truncate hidden md:inline">
+          • Planilla líquida: <strong class="text-slate-900">Q 27,141.07</strong> (Monetaria) 
+          • Traslado a Ahorro: <strong class="text-altus-blue font-bold">Q 11,551.09</strong>
+          • Pagar IGSS: <strong class="text-emerald-700 font-bold">Q 4,278.00</strong> (desde Ahorro)
+        </span>
       </div>
-      <div class="flex items-center gap-2">
-        <button onclick="window.AltusApp.switchTab('nominas')"
-          class="px-4 py-2 rounded-xl bg-altus-blue hover:bg-altus-blue-dark text-white font-bold text-xs shadow-sm transition-colors">
-          Ver Planilla Día 27 →
-        </button>
-      </div>
+      <button onclick="window.AltusApp.switchTab('nominas')"
+        class="text-altus-blue hover:text-altus-blue-dark font-bold text-xs shrink-0 whitespace-nowrap">
+        Ver Planilla →
+      </button>
     </div>
 
-    <!-- Dual Bank Accounts Cards (Clean White with Brand Color Accents) -->
+    <!-- 3 Key Balance Cards (High-Impact Minimalist Style) -->
     <section class="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-      <!-- Cuenta 1: BI Monetaria (1101) -->
-      <div class="bg-white border border-slate-200/90 border-t-4 border-t-altus-blue rounded-2xl p-4 md:p-5 shadow-xs hover:shadow-md transition-shadow relative">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-altus-blue uppercase tracking-wider flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            1101 • BI Monetaria (Disponible 2026)
-          </span>
-          <span class="text-[11px] font-mono text-slate-400">No. 2061406126</span>
+      <!-- Card 1: BI Monetaria Disponible 2026 -->
+      <div class="bg-white border border-slate-200 border-t-4 border-t-altus-blue rounded-2xl p-4 md:p-5 shadow-xs">
+        <div class="flex items-center justify-between text-xs text-slate-500 font-semibold">
+          <span class="uppercase tracking-wider text-altus-blue font-bold">Disponible 2026 (Monetaria)</span>
+          <span class="font-mono text-[11px] text-slate-400">No. 2061406126</span>
         </div>
-        <div id="header-saldo-monetaria" class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2 font-mono">Q 88,381.05</div>
-        <div id="header-sub-monetaria" class="text-xs text-slate-500 mt-1">
-          En banco: <strong class="text-slate-800">Q 97,531.05</strong> • Pasivo 2027: <strong class="text-altus-coral">-Q 9,150.00</strong>
-        </div>
-        <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-          <span>Libre para gastar en 2026</span>
-          <button onclick="window.AltusApp.triggerNLPFromButton('Separar provisión del mes a cuenta de ahorro Q11551.09')"
-            class="text-altus-blue hover:text-altus-blue-dark font-bold">⇄ Separar a Ahorro</button>
+        <div id="header-saldo-monetaria" class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2 font-mono tracking-tight">Q 88,381.05</div>
+        <div id="header-sub-monetaria" class="text-xs text-slate-500 mt-1.5">
+          En banco: <strong class="text-slate-800">Q 97,531.05</strong> • Anticipo 2027: <strong class="text-altus-coral">-Q 9,150.00</strong>
         </div>
       </div>
 
-      <!-- Cuenta 2: BI Ahorro / Reservas (1102) -->
-      <div class="bg-white border border-slate-200/90 border-t-4 border-t-indigo-600 rounded-2xl p-4 md:p-5 shadow-xs hover:shadow-md transition-shadow relative">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
-            1102 • BI Cuenta de Ahorro
-          </span>
+      <!-- Card 2: BI Ahorro Reservas -->
+      <div class="bg-white border border-slate-200 border-t-4 border-t-indigo-600 rounded-2xl p-4 md:p-5 shadow-xs">
+        <div class="flex items-center justify-between text-xs text-slate-500 font-semibold">
+          <span class="uppercase tracking-wider text-indigo-700 font-bold">Reserva Ahorro (1102)</span>
           <span class="px-2 py-0.5 rounded-full text-[10px] bg-indigo-50 text-indigo-700 font-bold border border-indigo-200">Fondo Blindado</span>
         </div>
-        <div id="header-saldo-ahorro" class="text-2xl md:text-3xl font-extrabold text-indigo-700 mt-2 font-mono">Q 89,018.67</div>
-        <div class="text-xs text-slate-500 mt-1">
-          Respalda IGSS mensual, Bono 14 y Aguinaldo
-        </div>
-        <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-          <span>Exclusivo prestaciones</span>
-          <button onclick="window.AltusApp.triggerNLPFromButton('Pagar IGSS desde cuenta de ahorro Q4278')"
-            class="text-indigo-700 hover:text-indigo-900 font-bold">🛡️ Pagar IGSS</button>
+        <div id="header-saldo-ahorro" class="text-2xl md:text-3xl font-extrabold text-indigo-700 mt-2 font-mono tracking-tight">Q 89,018.67</div>
+        <div class="text-xs text-slate-500 mt-1.5">
+          Respaldo de prestaciones: IGSS mensual, Bono 14 y Aguinaldo
         </div>
       </div>
 
-      <!-- Total Efectivo en Bancos -->
-      <div class="bg-white border border-slate-200/90 border-t-4 border-t-altus-amber rounded-2xl p-4 md:p-5 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between">
-        <div>
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Total Efectivo en Bancos</span>
-            <span class="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Conciliado BI
-            </span>
-          </div>
-          <div id="header-saldo-total" class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2 font-mono">Q 186,549.72</div>
-          <div id="header-sub-total" class="text-xs text-slate-500 mt-1">
-            Incluye <strong class="text-altus-amber-dark">Q 9,150.00</strong> de Inscripciones 2027 diferidas
-          </div>
+      <!-- Card 3: Total Efectivo en Bancos -->
+      <div class="bg-white border border-slate-200 border-t-4 border-t-altus-amber rounded-2xl p-4 md:p-5 shadow-xs">
+        <div class="flex items-center justify-between text-xs text-slate-500 font-semibold">
+          <span class="uppercase tracking-wider text-slate-700 font-bold">Total Efectivo en Bancos</span>
+          <span class="text-[11px] text-emerald-700 font-bold flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Conciliado BI
+          </span>
         </div>
-        <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-          <span>Monetaria + Reserva Ahorro</span>
-          <button onclick="window.AltusApp.exportJournalCSV()" class="text-slate-600 hover:text-slate-900 font-semibold underline">Exportar CSV</button>
+        <div id="header-saldo-total" class="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2 font-mono tracking-tight">Q 186,549.72</div>
+        <div id="header-sub-total" class="text-xs text-slate-500 mt-1.5">
+          Monetaria (Q 97,531.05) + Ahorro (Q 89,018.67)
         </div>
       </div>
     </section>
 
-    <!-- Desktop Navigation Pills (iOS Segmented Control Clean Style) -->
-    <nav class="hidden md:flex items-center gap-1.5 bg-slate-200/70 p-1.5 rounded-2xl border border-slate-200">
+    <!-- Navigation Tabs (Concise & Clean) -->
+    <nav class="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
       <button data-tab="asistente" onclick="window.AltusApp.switchTab('asistente')"
-        class="nav-tab-btn flex-1 py-2 px-3 rounded-xl text-xs font-bold border bg-white text-altus-blue shadow-xs border-slate-200/60 transition-all">
-        💬 Entrada Lenguaje Natural / 📷 Foto Factura
+        class="nav-tab-btn flex-1 py-2 px-3 rounded-lg text-xs font-bold bg-white text-altus-blue shadow-xs border border-slate-200/80 transition-all">
+        ✍️ Registrar Asiento
       </button>
       <button data-tab="dashboard" onclick="window.AltusApp.switchTab('dashboard')"
-        class="nav-tab-btn flex-1 py-2 px-3 rounded-xl text-xs font-bold border border-transparent text-slate-600 hover:text-slate-900 hover:bg-white/50 transition-all">
-        📊 Gráficas Ingresos vs. Egresos & Top Gastos
+        class="nav-tab-btn flex-1 py-2 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all">
+        📊 Métricas
       </button>
       <button data-tab="colegiaturas" onclick="window.AltusApp.switchTab('colegiaturas')"
-        class="nav-tab-btn flex-1 py-2 px-3 rounded-xl text-xs font-bold border border-transparent text-slate-600 hover:text-slate-900 hover:bg-white/50 transition-all">
-        👨‍👩‍👧 Familias y Colegiaturas (Pamela / Alumnos)
+        class="nav-tab-btn flex-1 py-2 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all">
+        👨‍👩‍👧 Colegiaturas
       </button>
       <button data-tab="nominas" onclick="window.AltusApp.switchTab('nominas')"
-        class="nav-tab-btn flex-1 py-2 px-3 rounded-xl text-xs font-bold border border-transparent text-slate-600 hover:text-slate-900 hover:bg-white/50 transition-all">
-        🗓️ Nómina Día 27 & Cuenta Ahorro
+        class="nav-tab-btn flex-1 py-2 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all">
+        🗓️ Nóminas
       </button>
       <button data-tab="presupuesto" onclick="window.AltusApp.switchTab('presupuesto')"
-        class="nav-tab-btn flex-1 py-2 px-3 rounded-xl text-xs font-bold border border-transparent text-slate-600 hover:text-slate-900 hover:bg-white/50 transition-all">
-        🎯 Presupuesto 2027 & Conciliación
+        class="nav-tab-btn flex-1 py-2 px-3 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 hover:bg-white/60 transition-all">
+        🎯 Presupuesto 2027
       </button>
     </nav>
 
     <!-- =====================================================================
          TAB 1: ASISTENTE LENGUAJE NATURAL, ESCÁNER DE FACTURAS Y LIBRO DIARIO
          ===================================================================== -->
-    <section id="tab-asistente" class="tab-section space-y-5">
-      <!-- Natural Language & Photo OCR Input Card -->
-      <div class="bg-white border border-slate-200 rounded-2xl p-4 md:p-6 shadow-sm">
-        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
-          <label for="nlp-input" class="text-xs md:text-sm font-bold text-slate-900 flex items-center gap-2">
-            <span class="text-altus-blue">✨ Escribe, dicta por voz o sube foto de una Factura FEL / Boleta</span>
-          </label>
-          <span class="text-[11px] text-slate-500 hidden sm:inline">Calcula IVA 12%, detecta NIT, DTE y asigna partida contable SAT</span>
-        </div>
-
-        <form id="nlp-form" class="flex flex-wrap sm:flex-nowrap items-center gap-2">
-          <div class="relative flex-1 w-full">
-            <input id="nlp-input" type="text"
-              placeholder='Ej: "Ya pagó Pamela", "Inscripción 2027 Rodrigo Q5150", o toca 📷 para fotografiar factura...'
-              class="w-full bg-slate-50 border border-slate-300 focus:border-altus-blue focus:bg-white rounded-xl pl-4 pr-20 py-3.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none shadow-inner transition-colors" />
-
-            <!-- Hidden file input for iPhone Camera / Photo Library & Mac Finder -->
-            <input id="invoice-photo-input" type="file" accept="image/*" class="hidden"
-              onchange="window.AltusApp.handleInvoicePhotoUpload(event)" />
-
-            <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-              <button type="button" onclick="document.getElementById('invoice-photo-input').click()"
-                title="Tomar foto o subir imagen de Factura FEL / Boleta"
-                class="w-8 h-8 rounded-lg bg-altus-coral-light hover:bg-altus-coral/20 border border-altus-coral/30 text-altus-coral flex items-center justify-center transition-colors">
-                📷
-              </button>
-              <button type="button" id="mic-btn" onclick="window.AltusApp.startVoiceDictation()"
-                title="Dictar por voz en iPhone / Mac"
-                class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center transition-colors">
-                🎙️
-              </button>
-            </div>
+    <section id="tab-asistente" class="tab-section space-y-4">
+      <!-- Main Input Box (Intuitive, Clean & Powerful) -->
+      <div class="bg-white border border-slate-200 rounded-2xl p-4 md:p-5 shadow-xs">
+        <form id="nlp-form" class="space-y-3">
+          <div class="flex items-center justify-between">
+            <label for="nlp-input" class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+              Registrar nuevo movimiento
+            </label>
+            <span class="text-[11px] text-slate-400 hidden sm:inline">Escribe, dicta o sube foto de una factura FEL</span>
           </div>
 
-          <button type="button" onclick="document.getElementById('invoice-photo-input').click()"
-            class="px-4 py-3.5 rounded-xl bg-altus-coral hover:bg-altus-coral-dark text-white font-bold text-xs whitespace-nowrap flex items-center gap-1.5 shadow-sm transition-colors">
-            <span>📷 Subir Factura / Boleta</span>
-          </button>
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div class="relative flex-1">
+              <input id="nlp-input" type="text"
+                placeholder='Ej: "Pagó Pamela octubre", "Factura librería Q350", "Inscripción Rodrigo Q5150"...'
+                class="w-full bg-slate-50 border border-slate-300 focus:border-altus-blue focus:bg-white rounded-xl pl-4 pr-16 py-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none transition-all shadow-inner" />
 
-          <button type="submit"
-            class="px-5 py-3.5 rounded-xl bg-altus-blue hover:bg-altus-blue-dark text-white font-extrabold text-sm shadow-sm whitespace-nowrap transition-colors">
-            Procesar →
-          </button>
+              <!-- Hidden file input for iPhone Camera / Photo Library & Mac Finder -->
+              <input id="invoice-photo-input" type="file" accept="image/*" class="hidden"
+                onchange="window.AltusApp.handleInvoicePhotoUpload(event)" />
+
+              <div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                <button type="button" onclick="document.getElementById('invoice-photo-input').click()"
+                  title="Tomar foto o subir Factura FEL"
+                  class="w-7 h-7 rounded-lg bg-slate-200/70 hover:bg-slate-300 text-slate-700 flex items-center justify-center text-xs transition-colors">
+                  📷
+                </button>
+                <button type="button" id="mic-btn" onclick="window.AltusApp.startVoiceDictation()"
+                  title="Dictar por voz"
+                  class="w-7 h-7 rounded-lg bg-slate-200/70 hover:bg-slate-300 text-slate-700 flex items-center justify-center text-xs transition-colors">
+                  🎙️
+                </button>
+              </div>
+            </div>
+
+            <button type="button" onclick="document.getElementById('invoice-photo-input').click()"
+              class="px-4 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs whitespace-nowrap flex items-center justify-center gap-1.5 transition-colors">
+              <span>📷 Subir Factura</span>
+            </button>
+
+            <button type="submit"
+              class="px-5 py-3 rounded-xl bg-altus-blue hover:bg-altus-blue-dark text-white font-bold text-xs shadow-xs whitespace-nowrap transition-colors flex items-center justify-center gap-1.5">
+              <span>Registrar →</span>
+            </button>
+          </div>
+
+          <!-- 4 Clean, Subtle Shortcuts -->
+          <div class="flex items-center gap-1.5 overflow-x-auto pt-1 pb-0.5 text-[11px]">
+            <span class="text-slate-400 mr-1">Atajos:</span>
+            <button type="button" onclick="window.AltusApp.handleProcessNLP('Ya pagó Pamela')"
+              class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium whitespace-nowrap">
+              + Colegiatura Pamela
+            </button>
+            <button type="button" onclick="window.AltusApp.handleProcessNLP('Anticipo inscripción 2027 Rodrigo Gallinsa Q5150')"
+              class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium whitespace-nowrap">
+              + Inscripción 2027 Rodrigo
+            </button>
+            <button type="button" onclick="window.AltusApp.handleProcessNLP('Separar provisión del mes a cuenta de ahorro')"
+              class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium whitespace-nowrap">
+              + Traspaso a Ahorro
+            </button>
+            <button type="button" onclick="window.AltusApp.handleProcessNLP('¿Quién falta de pagar en octubre?')"
+              class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium whitespace-nowrap">
+              🔍 ¿Quién falta en octubre?
+            </button>
+          </div>
         </form>
 
-        <!-- 1-Tap Quick Examples -->
-        <div class="mt-3 flex items-center gap-1.5 overflow-x-auto pb-1">
-          <span class="text-[11px] text-slate-400 whitespace-nowrap mr-1">Prueba 1-Tap:</span>
-          <button onclick="window.AltusApp.handleProcessNLP('Ya pagó Pamela')"
-            class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-[11px] text-slate-800 font-medium whitespace-nowrap">
-            "Ya pagó Pamela"
-          </button>
-          <button onclick="window.AltusApp.handleProcessNLP('Ya pagó Rodrigo octubre')"
-            class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-[11px] text-emerald-800 font-medium whitespace-nowrap">
-            "Ya pagó Rodrigo octubre"
-          </button>
-          <button onclick="window.AltusApp.handleProcessNLP('Anticipo inscripción 2027 Rodrigo Gallinsa Q5150')"
-            class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 border border-amber-200 text-[11px] text-amber-900 font-medium whitespace-nowrap">
-            "Inscripción 2027 (2107 Pasivo)"
-          </button>
-          <button onclick="window.AltusApp.handleProcessNLP('Separar provisión del mes a cuenta de ahorro')"
-            class="px-2.5 py-1 rounded-lg bg-altus-blue-light hover:bg-blue-100 border border-blue-200 text-[11px] text-altus-blue font-medium whitespace-nowrap">
-            "Separar provisión a ahorro"
-          </button>
-          <button onclick="window.AltusApp.handleProcessNLP('Pagar IGSS desde cuenta de ahorro')"
-            class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-[11px] text-indigo-800 font-medium whitespace-nowrap">
-            "Pagar IGSS desde ahorro"
-          </button>
-          <button onclick="window.AltusApp.handleProcessNLP('Compré papelería por Q350 factura FEL 89210')"
-            class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-[11px] text-rose-800 font-medium whitespace-nowrap">
-            "Compré papelería Q350 FEL"
-          </button>
-          <button onclick="window.AltusApp.handleProcessNLP('¿Quién falta de pagar en octubre?')"
-            class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 text-[11px] text-slate-800 font-medium whitespace-nowrap">
-            "¿Quién falta en octubre?"
-          </button>
-        </div>
-
         <!-- Dynamic Preview Container -->
-        <div id="nlp-preview-container" class="mt-4"></div>
+        <div id="nlp-preview-container" class="mt-3"></div>
       </div>
 
       <!-- Libro Diario Auditado -->
