@@ -126,6 +126,7 @@ window.AltusNLPEngine = (function () {
     const matchedStudent = findStudent(text, appData.students || []);
     if (matchedStudent) {
       const isInscription = /\b(inscripcion|matricula)\b/.test(norm);
+      const is2027Inscription = isInscription && (norm.includes('2027') || norm.includes('anticipo') || norm.includes('proximo') || explicitMonth === 'octubre' || explicitMonth === 'noviembre' || explicitMonth === 'diciembre' || !explicitMonth);
       const isMaterials = /\b(material|materiales|seguro|agenda|uniforme|cuenta ajena)\b/.test(norm);
       const targetMonth = explicitMonth || findPendingMonthForStudent(matchedStudent, null);
       const defaultAmt = isInscription
@@ -141,15 +142,23 @@ window.AltusNLPEngine = (function () {
         haber: `4102 - Colegiaturas Mensuales (Exento IVA Art. 8): Q ${monto.toFixed(2)}`
       };
 
-      if (isInscription) {
+      if (is2027Inscription) {
+        cuenta = '2107 - Anticipo de inscripciones';
+        tipo = 'Pasivo';
+        desc = `Cobro anticipo inscripción 2027 ${matchedStudent.estudiante} (${matchedStudent.idFamilia})`;
+        partidaDoble = {
+          debe: `1101 - Banco Operativo (BI-Monetaria Restringido 2027): +Q ${monto.toFixed(2)}`,
+          haber: `2107 - Anticipo de inscripciones (Pasivo Diferido en 2026 -> Pasa a Ingreso 4101 el 01/01/2027): Q ${monto.toFixed(2)}`
+        };
+      } else if (isInscription) {
         cuenta = '4101 - Inscripciones';
-        desc = `Cobro inscripción ${matchedStudent.estudiante} (${matchedStudent.idFamilia})`;
+        desc = `Cobro inscripción 2026 ${matchedStudent.estudiante} (${matchedStudent.idFamilia})`;
         partidaDoble.haber = `4101 - Inscripciones (Exento IVA Art. 8): Q ${monto.toFixed(2)}`;
       } else if (isMaterials) {
         cuenta = '2106 - Acreedores por Cuenta Ajena';
         tipo = 'Pasivo';
         desc = `Cobro cuenta ajena materiales/seguro ${matchedStudent.estudiante}`;
-        partidaDoble.haber = `2106 - Acreedores por Cuenta Ajena: Q ${monto.toFixed(2)}`;
+        partidaDoble.haber = `2106 - Acreedores por Cuenta Ajena (Pasivo Terceros): Q ${monto.toFixed(2)}`;
       }
 
       const alreadyPaidMonth = (matchedStudent.pagos && matchedStudent.pagos[targetMonth]) || 0;

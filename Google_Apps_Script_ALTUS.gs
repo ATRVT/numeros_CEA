@@ -1,132 +1,111 @@
 /**
  * ============================================================================
- * PUENTE DE SINCRONIZACIÓN EN TIEMPO REAL - CENTRO EDUCATIVO ALTUS
- * Google Sheets <-> App Contable iPhone & Mac (PWA)
+ * GOOGLE APPS SCRIPT - LIBRO CONTABLE ALTUS 26 AUDITADO (100% AUTÓNOMO)
  * ============================================================================
- * INSTRUCCIONES DE INSTALACIÓN (1 MINUTO):
- * 1. Sube "Libro_Contable_ALTUS_26_Auditado.xlsx" a tu Google Drive.
- * 2. Ábrelo con Google Sheets y ve al menú superior: Archivo -> Guardar como Hojas de cálculo de Google.
- * 3. En el menú superior ve a: Extensiones -> Apps Script.
- * 4. Borra el código de ejemplo, pega todo este archivo y presiona el ícono de Guardar (💾).
- * 5. Haz clic arriba a la derecha en "Implementar" -> "Nueva implementación".
- * 6. En Tipo selecciona "Aplicación web":
+ * INSTRUCCIONES DE INSTALACIÓN:
+ * 1. Sube el archivo "Libro_Contable_ALTUS_26_Auditado.xlsx" a tu Google Drive.
+ * 2. Ábrelo y ve a Archivo -> "Guardar como Hojas de cálculo de Google".
+ * 3. Ve al menú: Extensiones -> Apps Script.
+ * 4. Borra el código que haya y pega todo este archivo.
+ * 5. Haz clic en "Implementar" -> "Nueva implementación" -> Tipo: "Aplicación web".
  *    - Ejecutar como: "Yo"
  *    - Quién tiene acceso: "Cualquier persona"
- * 7. Haz clic en "Implementar", copia la URL generada y pégala en el botón "Conectar Sheets" de tu App ALTUS.
+ * 6. Copia la URL generada y pégala en el botón "Sincronizar Sheets" de tu App ALTUS.
  * ============================================================================
  */
 
-function doGet(e) {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  const action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'status';
-
-  if (action === 'sync') {
-    const diarioSheet = ss.getSheetByName('Diario');
-    const colegiaturasSheet = ss.getSheetByName('Colegiaturas');
-    return jsonResponse({
-      ok: true,
-      spreadsheetName: ss.getName(),
-      updatedAt: new Date().toISOString(),
-      diarioRows: diarioSheet ? diarioSheet.getLastRow() - 1 : 0,
-      colegiaturasRows: colegiaturasSheet ? colegiaturasSheet.getLastRow() - 1 : 0
-    });
+function doPost(e) {
+  try {
+    var payload = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    
+    if (payload.action === 'appendEntry' || payload.entry) {
+      var entry = payload.entry || payload;
+      var diario = ss.getSheetByName('Diario');
+      if (!diario) {
+        return jsonResponse({ status: 'error', message: 'No se encontró la pestaña Diario' });
+      }
+      
+      // Buscar la primera fila vacía en la columna G (Monto Bruto) a partir de la fila 2
+      var lastRow = Math.max(diario.getLastRow(), 2);
+      var colG = diario.getRange(2, 7, lastRow, 1).getValues();
+      var targetRow = lastRow + 1;
+      for (var i = 0; i < colG.length; i++) {
+        if (colG[i][0] === '' || colG[i][0] === null) {
+          targetRow = i + 2;
+          break;
+        }
+      }
+      
+      var r = targetRow;
+      var prev = r - 1;
+      
+      // Escribir valores y fórmulas vivas (Columnas A..O de Diario)
+      diario.getRange(r, 1).setFormula('=IF(G' + r + '="","","ALT-26-"&TEXT(ROW()-1,"000"))'); // A: ID Asiento
+      diario.getRange(r, 2).setValue(entry.fecha || '');                                       // B: Fecha
+      diario.getRange(r, 3).setValue((entry.mes || '').toLowerCase());                         // C: Mes
+      diario.getRange(r, 4).setValue(entry.descripcion || '');                                 // D: Descripción
+      diario.getRange(r, 5).setValue(entry.cuentaFull || entry.cuenta || '');                  // E: Cuenta Contable SAT
+      
+      // F: Tipo Movimiento (Fórmula conectada a Config)
+      diario.getRange(r, 6).setFormula(
+        '=IF(E' + r + '="","",IFERROR(VLOOKUP(E' + r + ',Config!$F$2:$G$60,2,FALSE),"Gasto"))'
+      );
+      
+      // G: Monto Bruto (Q)
+      diario.getRange(r, 7).setValue(Number(entry.montoBruto || 0));
+      
+      // H: IVA (Q) (Fórmula conectada a Config)
+      diario.getRange(r, 8).setFormula(
+        '=IF(G' + r + '="","",IF(IFERROR(VLOOKUP(E' + r + ',Config!$F$2:$H$60,3,FALSE),"Exento")="Afecto",ROUND(G' + r + '-(G' + r + '/1.12),2),0))'
+      );
+      
+      // I: Monto Neto (Q)
+      diario.getRange(r, 9).setFormula('=IF(G' + r + '="","",ROUND(G' + r + '-H' + r + ',2))');
+      
+      // J: Cuenta Bancaria
+      diario.getRange(r, 10).setValue(entry.banco || 'BI- Monetaria');
+      
+      // K: Saldo BI-Monetaria (Q)
+      diario.getRange(r, 11).setFormula(
+        '=IF(G' + r + '="","",ROUND(K' + prev + '+IF(J' + r + '="BI-Ahorro",0,IF(F' + r + '="Gasto",-G' + r + ',G' + r + ')),2))'
+      );
+      
+      // L: Saldo BI-Ahorro (Q)
+      diario.getRange(r, 12).setFormula(
+        '=IF(G' + r + '="","",ROUND(L' + prev + '+IF(LEFT(E' + r + ',4)="2102",G' + r + ',IF(J' + r + '="BI-Ahorro",-G' + r + ',0)),2))'
+      );
+      
+      // M, N, O: Metadatos de Auditoría
+      diario.getRange(r, 13).setValue(entry.documento || entry.numDoc || 'S/N');
+      diario.getRange(r, 14).setValue(entry.centroCosto || '00-Administración');
+      diario.getRange(r, 15).setValue(entry.notaAuditoria || ('Registrado desde App ALTUS (' + new Date().toISOString().slice(0, 16).replace('T', ' ') + ')'));
+      
+      return jsonResponse({
+        status: 'ok',
+        row: r,
+        message: 'Asiento registrado en fila ' + r + '. Colegiaturas, Conciliación y Panel V2 se actualizan solos por fórmula.'
+      });
+    }
+    
+    return jsonResponse({ status: 'error', message: 'Acción no reconocida' });
+  } catch (err) {
+    return jsonResponse({ status: 'error', message: err.toString() });
   }
+}
 
+function doGet(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var diario = ss.getSheetByName('Diario');
+  var lastRow = diario ? diario.getLastRow() : 1;
   return jsonResponse({
-    ok: true,
-    status: 'ALTUS Contabilidad Bridge Active',
-    spreadsheetName: ss.getName(),
-    timestamp: new Date().toISOString()
+    status: 'ok',
+    workbook: ss.getName(),
+    diarioRows: lastRow - 1
   });
 }
 
-function doPost(e) {
-  try {
-    const payload = JSON.parse(e.postData.contents);
-    const ss = SpreadsheetApp.getActiveSpreadsheet();
-    const action = payload.action || 'appendEntry';
-
-    if (action === 'appendEntry') {
-      const entry = payload.entry;
-      const diario = ss.getSheetByName('Diario');
-      if (!diario) throw new Error('No se encontró la pestaña Diario');
-
-      diario.appendRow([
-        entry.id,
-        entry.fecha,
-        entry.mes,
-        entry.descripcion,
-        entry.cuenta,
-        entry.tipo,
-        Number(entry.montoBruto),
-        Number(entry.iva || 0),
-        Number(entry.montoNeto),
-        entry.banco,
-        Number(entry.saldoMonetaria),
-        Number(entry.saldoAhorro),
-        entry.documento || '',
-        entry.centroCosto || '00-Administración',
-        entry.notaAuditoria || 'Registrado desde App ALTUS iPhone/Mac'
-      ]);
-
-      // Si es un pago de colegiatura, actualizar matriz en pestaña Colegiaturas
-      if (entry.studentUpdate && entry.studentUpdate.idFamilia && entry.studentUpdate.mes) {
-        updateStudentTuitionCell(ss, entry.studentUpdate.idFamilia, entry.studentUpdate.mes, Number(entry.montoBruto));
-      }
-
-      return jsonResponse({ ok: true, id: entry.id, message: 'Asiento registrado en Google Sheets exitosamente' });
-    }
-
-    if (action === 'batchEntries') {
-      const entries = payload.entries || [];
-      const diario = ss.getSheetByName('Diario');
-      entries.forEach(function(entry) {
-        diario.appendRow([
-          entry.id,
-          entry.fecha,
-          entry.mes,
-          entry.descripcion,
-          entry.cuenta,
-          entry.tipo,
-          Number(entry.montoBruto),
-          Number(entry.iva || 0),
-          Number(entry.montoNeto),
-          entry.banco,
-          Number(entry.saldoMonetaria),
-          Number(entry.saldoAhorro),
-          entry.documento || '',
-          entry.centroCosto || '00-Administración',
-          entry.notaAuditoria || 'Lote Nómina Día 27 App ALTUS'
-        ]);
-      });
-      return jsonResponse({ ok: true, count: entries.length, message: 'Lote registrado en Google Sheets' });
-    }
-
-    return jsonResponse({ ok: false, error: 'Acción no reconocida: ' + action });
-  } catch (err) {
-    return jsonResponse({ ok: false, error: err.toString() });
-  }
-}
-
-function updateStudentTuitionCell(ss, idFamilia, mesNombre, monto) {
-  const sheet = ss.getSheetByName('Colegiaturas');
-  if (!sheet) return;
-  const data = sheet.getDataRange().getValues();
-  const headers = data[0].map(function(h) { return String(h).toLowerCase().trim(); });
-  const colIndex = headers.indexOf(mesNombre.toLowerCase().trim());
-  if (colIndex === -1) return;
-
-  for (var r = 1; r < data.length; r++) {
-    if (String(data[r][0]).trim() === String(idFamilia).trim()) {
-      const currentVal = Number(data[r][colIndex] || 0);
-      sheet.getRange(r + 1, colIndex + 1).setValue(currentVal + monto);
-      break;
-    }
-  }
-}
-
 function jsonResponse(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
+  return ContentService.createTextOutput(JSON.stringify(obj))
     .setMimeType(ContentService.MimeType.JSON);
 }
