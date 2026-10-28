@@ -187,24 +187,29 @@
 
   // Handle Natural Language Input
   function handleProcessNLP(customText) {
-    const inputEl = document.getElementById('nlp-input');
-    const text = customText !== undefined ? customText : (inputEl ? inputEl.value : '');
-    if (!text || !text.trim()) return;
-    if (inputEl && customText !== undefined) {
-      inputEl.value = customText;
-    }
+    try {
+      const inputEl = document.getElementById('nlp-input');
+      const text = customText !== undefined ? customText : (inputEl ? inputEl.value : '');
+      if (!text || !text.trim()) return;
+      if (inputEl && customText !== undefined) {
+        inputEl.value = customText;
+      }
 
-    const parsed = window.AltusNLPEngine.parseNaturalInput(text, state);
-    if (!parsed) return;
+      const parsed = window.AltusNLPEngine.parseNaturalInput(text, state);
+      if (!parsed) return;
 
-    if (parsed.kind === 'query_answer') {
-      currentQueryResult = parsed;
-      currentDraft = null;
-    } else {
-      currentDraft = parsed;
-      currentQueryResult = null;
+      if (parsed.kind === 'query_answer') {
+        currentQueryResult = parsed;
+        currentDraft = null;
+      } else {
+        currentDraft = parsed;
+        currentQueryResult = null;
+      }
+      renderNLPPreview();
+    } catch (err) {
+      console.error('Error procesando entrada contable:', err);
+      showToast('⚠️ No se pudo interpretar la entrada. Intenta escribir el monto o nombre.');
     }
-    renderNLPPreview();
   }
 
   // Handle Camera / Photo Upload of FEL Invoices & Bank Receipts (OCR + Auto-Draft)
@@ -1022,35 +1027,111 @@
     });
   }
 
-  // Voice Dictation (iPhone Safari & Mac Web Speech API)
+  // Voice Dictation (iPhone Safari & Mac Web Speech API - Safe & Non-Blocking)
+  let activeRecognition = null;
+  let recognitionTimeout = null;
+
+  function resetMicUI() {
+    const micBtn = document.getElementById('mic-btn');
+    if (micBtn) {
+      micBtn.classList.remove('animate-pulse', 'bg-rose-600', 'text-white');
+      micBtn.innerHTML = '🎙️';
+      micBtn.title = 'Dictar por voz';
+    }
+    if (recognitionTimeout) {
+      clearTimeout(recognitionTimeout);
+      recognitionTimeout = null;
+    }
+    activeRecognition = null;
+  }
+
   function startVoiceDictation() {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      showToast('Usa el micrófono del teclado de tu iPhone o escribe en la barra superior.');
-      document.getElementById('nlp-input').focus();
+    // If already listening, clicking again cancels/stops gracefully
+    if (activeRecognition) {
+      try {
+        activeRecognition.abort();
+      } catch (e) {}
+      resetMicUI();
+      showToast('Dictado detenido.');
       return;
     }
-    const recognition = new SpeechRecognition();
-    recognition.lang = 'es-GT';
-    recognition.interimResults = false;
-    recognition.maxAlternatives = 1;
 
-    const micBtn = document.getElementById('mic-btn');
-    if (micBtn) micBtn.classList.add('animate-pulse', 'bg-rose-600', 'text-white');
-    showToast('🎙️ Escuchando... Di por ejemplo: "Ya pagó Pamela"');
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      showToast('💡 En tu iPhone, toca el micrófono 🎙️ del teclado para dictar.');
+      const inp = document.getElementById('nlp-input');
+      if (inp) inp.focus();
+      return;
+    }
 
-    recognition.onresult = function (event) {
-      const transcript = event.results[0][0].transcript;
-      document.getElementById('nlp-input').value = transcript;
-      handleProcessNLP(transcript);
-    };
-    recognition.onerror = function () {
-      if (micBtn) micBtn.classList.remove('animate-pulse', 'bg-rose-600', 'text-white');
-    };
-    recognition.onend = function () {
-      if (micBtn) micBtn.classList.remove('animate-pulse', 'bg-rose-600', 'text-white');
-    };
-    recognition.start();
+    try {
+      const recognition = new SpeechRecognition();
+      // Use standard Spanish locale with fallback to avoid iOS hanging on locale download
+      recognition.lang = (navigator.language && navigator.language.startsWith('es')) ? navigator.language : 'es-419';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      recognition.continuous = false;
+
+      const micBtn = document.getElementById('mic-btn');
+      if (micBtn) {
+        micBtn.classList.add('animate-pulse', 'bg-rose-600', 'text-white');
+        micBtn.innerHTML = '⏹️';
+        micBtn.title = 'Toca para detener';
+      }
+      showToast('🎙️ Escuchando... Di un pago o gasto (toca ⏹️ para parar)');
+
+      activeRecognition = recognition;
+
+      // Watchdog timer: If nothing heard within 6 seconds, abort safely so the UI never freezes
+      recognitionTimeout = setTimeout(() => {
+        try {
+          if (activeRecognition) activeRecognition.stop();
+        } catch (e) {}
+        resetMicUI();
+      }, 6000);
+
+      recognition.onresult = function (event) {
+        resetMicUI();
+        try {
+          if (event.results && event.results.length > 0 && event.results[0].length > 0) {
+            const transcript = event.results[0][0].transcript;
+            if (transcript && transcript.trim()) {
+              const inp = document.getElementById('nlp-input');
+              if (inp) inp.value = transcript.trim();
+              handleProcessNLP(transcript.trim());
+            }
+          }
+        } catch (err) {
+          console.warn('Error procesando voz:', err);
+        }
+      };
+
+      recognition.onerror = function (event) {
+        resetMicUI();
+        const errType = (event && event.error) ? event.error : 'error';
+        if (errType === 'not-allowed' || errType === 'service-not-allowed') {
+          showToast('💡 Permiso de micrófono denegado. Puedes usar el micrófono 🎙️ de tu teclado.');
+        } else if (errType === 'no-speech') {
+          showToast('No se escuchó audio. Puedes usar el teclado para dictar.');
+        } else if (errType !== 'aborted') {
+          showToast('💡 En iPhone, puedes tocar el micrófono 🎙️ de tu teclado para dictar directo.');
+        }
+        const inp = document.getElementById('nlp-input');
+        if (inp) inp.focus();
+      };
+
+      recognition.onend = function () {
+        resetMicUI();
+      };
+
+      recognition.start();
+    } catch (err) {
+      console.warn('Error iniciando SpeechRecognition:', err);
+      resetMicUI();
+      showToast('💡 Toca el micrófono 🎙️ de tu teclado de iPhone para dictar directamente.');
+      const inp = document.getElementById('nlp-input');
+      if (inp) inp.focus();
+    }
   }
 
   // Export Live Data to CSV / Excel compatible format
